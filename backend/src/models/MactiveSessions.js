@@ -31,4 +31,5 @@ const ActiveSession = sequelize.define(
   }
 );
 
+
 export default ActiveSession;
