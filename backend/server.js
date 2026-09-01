@@ -5,6 +5,11 @@ import User from "./src/models/userModel.js";
 dotenv.config();
 const app = express();
 
+// Bắt buộc để req.body đọc được JSON — Cusers/CNotes/CAuth/... (controller vừa viết)
+// đều đọc req.body cho các route POST/PATCH. Express 5 KHÔNG tự bật body-parser,
+// thiếu dòng này thì req.body sẽ luôn là undefined.
+app.use(express.json());
+
 const PORT = process.env.PORT || 3000;
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
