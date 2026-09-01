@@ -1,5 +1,5 @@
 import express from "express";
-import authController from "../controller/Cauth.js";
+import authController from "../controller/CAuth.js";
 
 /**
  * authRouter — Module 1 (Tài khoản & Phân quyền), phần xác thực.
