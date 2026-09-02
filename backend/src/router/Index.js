@@ -2,8 +2,8 @@ import express from "express";
 import { AppError } from "../service/index.js";
 import { sendError } from "../controller/Httphelper.js";
 
-import authRouter from "./Authrouter.js";
-import userRouter from "./Userrouter.js";
+import authRouter from "./AuthRouter.js";
+import userRouter from "./UserRouter.js";
 import userSettingRouter from "./UserSettingRouter.js";
 import roleRouter from "./RoleRouter.js";
 import noteRouter from "./NoteRouter.js";

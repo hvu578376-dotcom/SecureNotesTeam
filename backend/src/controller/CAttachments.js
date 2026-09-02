@@ -1,5 +1,5 @@
 import { attachmentService } from "../service/index.js";
-import { asyncHandler, getCurrentUserId } from "./Httphelper.js";
+import { asyncHandler } from "./Httphelper.js";
 
 /**
  * CAttachments — Controller cho Module 4 (phần 2): Tệp đính kèm.
@@ -17,7 +17,7 @@ import { asyncHandler, getCurrentUserId } from "./Httphelper.js";
  */
 
 export const addAttachment = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   const { fileName, fileUrl, fileType, fileSize, encryptionIv } = req.body ?? {};
   const attachment = await attachmentService.addAttachment(req.params.noteId, userId, {
     fileName,
@@ -30,13 +30,13 @@ export const addAttachment = asyncHandler(async (req, res) => {
 });
 
 export const listAttachments = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   const attachments = await attachmentService.listAttachments(req.params.noteId, userId);
   res.json({ success: true, data: attachments });
 });
 
 export const deleteAttachment = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   await attachmentService.deleteAttachment(req.params.attachmentId, userId);
   res.json({ success: true, message: "Đã xoá tệp đính kèm." });
 });

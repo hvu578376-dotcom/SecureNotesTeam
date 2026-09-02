@@ -1,5 +1,5 @@
 import { noteService } from "../service/index.js";
-import { asyncHandler, getCurrentUserId } from "./Httphelper.js";
+import { asyncHandler } from "./Httphelper.js";
 
 /**
  * CNotes — Controller cho Module 2 & 3 (Notes & Private Notes).
@@ -20,14 +20,14 @@ import { asyncHandler, getCurrentUserId } from "./Httphelper.js";
  */
 
 export const createNote = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   const { title, content, isPrivate, color } = req.body ?? {};
   const note = await noteService.createNote(userId, { title, content, isPrivate, color });
   res.status(201).json({ success: true, data: note });
 });
 
 export const listMyNotes = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   const includeTrashed = req.query.includeTrashed === "true";
   const notes = await noteService.listMyNotes(userId, { includeTrashed });
   res.json({ success: true, data: notes });
@@ -35,19 +35,19 @@ export const listMyNotes = asyncHandler(async (req, res) => {
 
 /** Ghi chú người KHÁC đã chia sẻ cho user hiện tại (qua note_shares) — khác với listMyNotes (ghi chú do chính mình sở hữu). */
 export const listSharedWithMe = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   const notes = await noteService.listSharedWithMe(userId);
   res.json({ success: true, data: notes });
 });
 
 export const getNote = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   const note = await noteService.getNoteById(req.params.noteId, userId);
   res.json({ success: true, data: note });
 });
 
 export const updateNote = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   const { title, content, color } = req.body ?? {};
   const note = await noteService.updateNote(req.params.noteId, userId, { title, content, color });
   res.json({ success: true, data: note });
@@ -55,7 +55,7 @@ export const updateNote = asyncHandler(async (req, res) => {
 
 /** Chỉ chủ sở hữu note mới đổi được cờ is_private (đã enforce trong noteService.setPrivate). */
 export const setPrivate = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   const { isPrivate } = req.body ?? {};
   const note = await noteService.setPrivate(req.params.noteId, userId, isPrivate);
   res.json({ success: true, data: note });

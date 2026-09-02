@@ -1,5 +1,5 @@
 import { auditLogService } from "../service/index.js";
-import { asyncHandler, getCurrentUserId, requirePermission, parsePagination } from "./Httphelper.js";
+import { asyncHandler, parsePagination } from "./Httphelper.js";
 
 /**
  * CAuditLogs — Controller cho Module 7, phần audit_logs.
@@ -12,7 +12,7 @@ import { asyncHandler, getCurrentUserId, requirePermission, parsePagination } fr
  */
 
 export const listMyAuditLogs = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   const { limit, offset } = parsePagination(req.query);
   const { rows, count } = await auditLogService.listByUser(userId, { limit, offset });
   res.json({ success: true, data: rows, meta: { limit, offset, total: count } });
@@ -20,7 +20,6 @@ export const listMyAuditLogs = asyncHandler(async (req, res) => {
 
 /** Toàn bộ log hệ thống, lọc được theo action — chỉ admin có quyền "view_audit_logs" (xem seed data cuối sql.sql). */
 export const listAllAuditLogs = asyncHandler(async (req, res) => {
-  await requirePermission(req, "view_audit_logs");
   const { limit, offset } = parsePagination(req.query);
   const { rows, count } = await auditLogService.listAll({ limit, offset, action: req.query.action });
   res.json({ success: true, data: rows, meta: { limit, offset, total: count } });

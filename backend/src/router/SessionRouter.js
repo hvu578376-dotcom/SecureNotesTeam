@@ -1,5 +1,6 @@
 import express from "express";
 import sessionController from "../controller/CActiveSessions.js";
+import { requireAuth } from "../middleware/auth.js";
 
 /**
  * sessionRouter — Module 7, quản lý phiên đăng nhập (active_sessions).
@@ -8,8 +9,8 @@ import sessionController from "../controller/CActiveSessions.js";
  */
 const router = express.Router();
 
-router.get("/sessions", sessionController.listMySessions);
-router.delete("/sessions/:sessionId", sessionController.revokeSession);
-router.delete("/sessions", sessionController.revokeAllOtherSessions);
+router.get("/sessions", requireAuth, sessionController.listMySessions);
+router.delete("/sessions/:sessionId", requireAuth, sessionController.revokeSession);
+router.delete("/sessions", requireAuth, sessionController.revokeAllOtherSessions);
 
 export default router;

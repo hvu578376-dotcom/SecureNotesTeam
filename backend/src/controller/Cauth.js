@@ -1,29 +1,32 @@
 import { authService } from "../service/index.js";
-import { asyncHandler, getBearerToken, getCurrentUserId } from "./Httphelper.js";
+import { asyncHandler } from "./Httphelper.js";
+import { getBearerToken } from "../middleware/auth.js";
 
 /**
  * CAuth — Controller cho Module 1 (Tài khoản & Phân quyền), phần xác thực.
  *
- * Đây chính là controller mà frontend/login.html đang chờ — comment
- * trong file đó ghi rõ: "Backend hiện chưa có route POST /api/auth/login
- * ... hãy nối controller xác thực để hoàn thiện luồng". authService.js
- * (đã có sẵn) đã xử lý toàn bộ logic nghiệp vụ; controller ở đây chỉ làm
- * nhiệm vụ "dịch" giữa HTTP (req/res) và authService.
+ * Đây chính là controller mà frontend/login.html gọi tới qua
+ * POST /api/auth/login. authService.js (đã có sẵn) xử lý toàn bộ logic
+ * nghiệp vụ; controller ở đây chỉ làm nhiệm vụ "dịch" giữa HTTP (req/res)
+ * và authService.
  *
- * Route dự kiến (sẽ gắn ở tầng router — chưa làm trong lần này):
+ * Route đã được gắn đầy đủ ở tầng router (xem backend/src/router/AuthRouter.js,
+ * gộp vào backend/src/router/index.js rồi mount ở server.js qua app.use("/api", ...)):
  *   POST   /api/auth/register       -> register
  *   POST   /api/auth/verify-email   -> verifyEmail
  *   POST   /api/auth/login          -> login                  (khớp đúng request của frontend/login.html)
  *   POST   /api/auth/login/2fa      -> verifyTwoFactor         (bước 2 khi tài khoản có bật 2FA)
- *   POST   /api/auth/logout         -> logout                 (cần header Authorization)
- *   PATCH  /api/auth/password       -> changePassword         (cần header Authorization)
- *   POST   /api/auth/2fa/setup      -> beginTwoFactorSetup     (cần header Authorization)
- *   POST   /api/auth/2fa/confirm    -> confirmTwoFactorSetup   (cần header Authorization)
- *   POST   /api/auth/2fa/disable    -> disableTwoFactor        (cần header Authorization)
+ *   POST   /api/auth/logout         -> logout
+ *   PATCH  /api/auth/password       -> changePassword         (middleware requireAuth)
+ *   POST   /api/auth/2fa/setup      -> beginTwoFactorSetup     (middleware requireAuth)
+ *   POST   /api/auth/2fa/confirm    -> confirmTwoFactorSetup   (middleware requireAuth)
+ *   POST   /api/auth/2fa/disable    -> disableTwoFactor        (middleware requireAuth)
  *
- * LƯU Ý: các route cần "header Authorization" phải gửi kèm
- * "Authorization: Bearer <token>", với <token> là giá trị "token" nhận
- * được từ login()/verifyTwoFactor() lúc đăng nhập thành công.
+ * LƯU Ý: logout KHÔNG gắn middleware requireAuth — cố tình để nguyên
+ * dạng "khoan dung" (đăng xuất với token đã hết hạn/không hợp lệ vẫn
+ * trả 200, xem authService.logout tự bắt lỗi findSessionByToken rồi bỏ
+ * qua), thay vì trả 401 như các route khác. Vì vậy controller ở đây vẫn
+ * tự đọc token qua getBearerToken() thay vì req.token.
  */
 
 export const register = asyncHandler(async (req, res) => {
@@ -80,8 +83,8 @@ export const logout = asyncHandler(async (req, res) => {
 
 /** Đổi mật khẩu — tự động đăng xuất mọi thiết bị KHÁC (xem authService.changePassword). */
 export const changePassword = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
-  const currentToken = getBearerToken(req);
+  const userId = req.userId;
+  const currentToken = req.token;
   const { oldPassword, newPassword } = req.body ?? {};
   const user = await authService.changePassword(userId, {
     oldPassword,
@@ -95,14 +98,14 @@ export const changePassword = asyncHandler(async (req, res) => {
 
 /** Bước 1 bật 2FA: sinh secret + otpauth URL để FE vẽ QR (chưa bật thật). */
 export const beginTwoFactorSetup = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   const result = await authService.beginTwoFactorSetup(userId);
   res.json({ success: true, data: result });
 });
 
 /** Bước 2 bật 2FA: xác nhận mã 6 số từ app Authenticator để bật thật. */
 export const confirmTwoFactorSetup = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   const { code } = req.body ?? {};
   const user = await authService.confirmTwoFactorSetup(userId, code);
   res.json({ success: true, data: { user } });
@@ -110,7 +113,7 @@ export const confirmTwoFactorSetup = asyncHandler(async (req, res) => {
 
 /** Tắt 2FA — bắt buộc nhập lại mật khẩu hiện tại (xem authService.disableTwoFactor). */
 export const disableTwoFactor = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   const { password } = req.body ?? {};
   const user = await authService.disableTwoFactor(userId, { password });
   res.json({ success: true, data: { user } });

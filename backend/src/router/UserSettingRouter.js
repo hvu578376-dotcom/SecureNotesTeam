@@ -1,5 +1,6 @@
 import express from "express";
 import userSettingController from "../controller/CUserSettings.js";
+import { requireAuth } from "../middleware/auth.js";
 
 /**
  * userSettingRouter — Module 8, phần user_settings (quan hệ 1-1 với users).
@@ -12,7 +13,7 @@ import userSettingController from "../controller/CUserSettings.js";
  */
 const router = express.Router();
 
-router.get("/users/me/settings", userSettingController.getMySettings);
-router.patch("/users/me/settings", userSettingController.updateMySettings);
+router.get("/users/me/settings", requireAuth, userSettingController.getMySettings);
+router.patch("/users/me/settings", requireAuth, userSettingController.updateMySettings);
 
 export default router;

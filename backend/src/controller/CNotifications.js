@@ -1,5 +1,5 @@
 import { notificationService } from "../service/index.js";
-import { asyncHandler, getCurrentUserId, parsePagination } from "./Httphelper.js";
+import { asyncHandler, parsePagination } from "./Httphelper.js";
 
 /**
  * CNotifications — Controller cho Module 5 & 6, phần thông báo.
@@ -16,7 +16,7 @@ import { asyncHandler, getCurrentUserId, parsePagination } from "./Httphelper.js
  */
 
 export const listMyNotifications = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   const { limit, offset } = parsePagination(req.query);
   const unreadOnly = req.query.unreadOnly === "true";
   const { rows, count } = await notificationService.listForUser(userId, { unreadOnly, limit, offset });
@@ -25,25 +25,25 @@ export const listMyNotifications = asyncHandler(async (req, res) => {
 
 /** Dùng cho chấm đỏ/số đếm chưa đọc trên icon chuông thông báo. */
 export const getUnreadCount = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   const count = await notificationService.unreadCount(userId);
   res.json({ success: true, data: { count } });
 });
 
 export const markAsRead = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   const notification = await notificationService.markAsRead(req.params.notificationId, userId);
   res.json({ success: true, data: notification });
 });
 
 export const markAllAsRead = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   const affectedCount = await notificationService.markAllAsRead(userId);
   res.json({ success: true, data: { affectedCount } });
 });
 
 export const deleteNotification = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   await notificationService.deleteNotification(req.params.notificationId, userId);
   res.json({ success: true, message: "Đã xoá thông báo." });
 });

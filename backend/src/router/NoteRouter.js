@@ -1,5 +1,6 @@
 import express from "express";
 import noteController from "../controller/CNotes.js";
+import { requireAuth } from "../middleware/auth.js";
 
 /**
  * noteRouter — Module 2 & 3 (Notes & Private Notes).
@@ -14,11 +15,11 @@ import noteController from "../controller/CNotes.js";
  */
 const router = express.Router();
 
-router.post("/notes", noteController.createNote);
-router.get("/notes", noteController.listMyNotes);
-router.get("/notes/shared-with-me", noteController.listSharedWithMe);
-router.get("/notes/:noteId", noteController.getNote);
-router.patch("/notes/:noteId", noteController.updateNote);
-router.patch("/notes/:noteId/private", noteController.setPrivate);
+router.post("/notes", requireAuth, noteController.createNote);
+router.get("/notes", requireAuth, noteController.listMyNotes);
+router.get("/notes/shared-with-me", requireAuth, noteController.listSharedWithMe);
+router.get("/notes/:noteId", requireAuth, noteController.getNote);
+router.patch("/notes/:noteId", requireAuth, noteController.updateNote);
+router.patch("/notes/:noteId/private", requireAuth, noteController.setPrivate);
 
 export default router;

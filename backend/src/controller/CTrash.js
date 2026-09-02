@@ -1,5 +1,5 @@
 import { trashService } from "../service/index.js";
-import { asyncHandler, getCurrentUserId, requirePermission } from "./Httphelper.js";
+import { asyncHandler } from "./Httphelper.js";
 
 /**
  * CTrash — Controller cho Module 4 (phần 1): Thùng rác.
@@ -15,25 +15,25 @@ import { asyncHandler, getCurrentUserId, requirePermission } from "./Httphelper.
  */
 
 export const listMyTrash = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   const notes = await trashService.listMyTrash(userId);
   res.json({ success: true, data: notes });
 });
 
 export const moveToTrash = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   const result = await trashService.moveToTrash(req.params.noteId, userId);
   res.json({ success: true, data: result });
 });
 
 export const restoreFromTrash = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   const result = await trashService.restoreFromTrash(req.params.noteId, userId);
   res.json({ success: true, data: result });
 });
 
 export const permanentlyDelete = asyncHandler(async (req, res) => {
-  const userId = await getCurrentUserId(req);
+  const userId = req.userId;
   await trashService.permanentlyDelete(req.params.noteId, userId);
   res.json({ success: true, message: "Đã xoá vĩnh viễn ghi chú." });
 });
@@ -46,7 +46,6 @@ export const permanentlyDelete = asyncHandler(async (req, res) => {
  * cần, VD lúc chưa kịp cấu hình cronjob.
  */
 export const purgeExpiredTrash = asyncHandler(async (req, res) => {
-  await requirePermission(req, "manage_users");
   const purgedCount = await trashService.purgeExpiredTrash();
   res.json({ success: true, data: { purgedCount } });
 });

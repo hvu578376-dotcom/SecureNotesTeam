@@ -1,5 +1,6 @@
 import express from "express";
-import userController from "../controller/Cusers.js";
+import userController from "../controller/CUsers.js";
+import { requireAuth, requirePermission } from "../middleware/auth.js";
 
 /**
  * userRouter — Module 1 (Tài khoản) & Module 8 (Admin Dashboard), phần User.
@@ -13,10 +14,10 @@ import userController from "../controller/Cusers.js";
  */
 const router = express.Router();
 
-router.get("/users/me", userController.getMe);
-router.get("/users", userController.listUsers);
-router.get("/users/:userId", userController.getUserById);
-router.patch("/users/:userId/status", userController.updateUserStatus);
-router.patch("/users/:userId/role", userController.updateUserRole);
+router.get("/users/me", requireAuth, userController.getMe);
+router.get("/users", requirePermission("manage_users"), userController.listUsers);
+router.get("/users/:userId", requirePermission("manage_users"), userController.getUserById);
+router.patch("/users/:userId/status", requirePermission("manage_users"), userController.updateUserStatus);
+router.patch("/users/:userId/role", requirePermission("manage_users"), userController.updateUserRole);
 
 export default router;

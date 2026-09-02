@@ -1,5 +1,6 @@
 import express from "express";
 import notificationController from "../controller/CNotifications.js";
+import { requireAuth } from "../middleware/auth.js";
 
 /**
  * notificationRouter — Module 5 & 6, phần thông báo.
@@ -9,10 +10,10 @@ import notificationController from "../controller/CNotifications.js";
  */
 const router = express.Router();
 
-router.get("/notifications", notificationController.listMyNotifications);
-router.get("/notifications/unread-count", notificationController.getUnreadCount);
-router.patch("/notifications/:notificationId/read", notificationController.markAsRead);
-router.patch("/notifications/read-all", notificationController.markAllAsRead);
-router.delete("/notifications/:notificationId", notificationController.deleteNotification);
+router.get("/notifications", requireAuth, notificationController.listMyNotifications);
+router.get("/notifications/unread-count", requireAuth, notificationController.getUnreadCount);
+router.patch("/notifications/:notificationId/read", requireAuth, notificationController.markAsRead);
+router.patch("/notifications/read-all", requireAuth, notificationController.markAllAsRead);
+router.delete("/notifications/:notificationId", requireAuth, notificationController.deleteNotification);
 
 export default router;

@@ -1,5 +1,6 @@
 import express from "express";
 import attachmentController from "../controller/CAttachments.js";
+import { requireAuth } from "../middleware/auth.js";
 
 /**
  * attachmentRouter — Module 4 (phần 2): Tệp đính kèm.
@@ -9,8 +10,8 @@ import attachmentController from "../controller/CAttachments.js";
  */
 const router = express.Router();
 
-router.post("/notes/:noteId/attachments", attachmentController.addAttachment);
-router.get("/notes/:noteId/attachments", attachmentController.listAttachments);
-router.delete("/attachments/:attachmentId", attachmentController.deleteAttachment);
+router.post("/notes/:noteId/attachments", requireAuth, attachmentController.addAttachment);
+router.get("/notes/:noteId/attachments", requireAuth, attachmentController.listAttachments);
+router.delete("/attachments/:attachmentId", requireAuth, attachmentController.deleteAttachment);
 
 export default router;
