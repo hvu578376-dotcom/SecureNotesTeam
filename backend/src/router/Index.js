@@ -2,18 +2,18 @@ import express from "express";
 import { AppError } from "../service/index.js";
 import { sendError } from "../controller/Httphelper.js";
 
-import authRouter from "./Authrouter.js";
-import userRouter from "./Userrouter.js";
-import userSettingRouter from "./Usersettingrouter.js";
+import authRouter from "./AuthRouter.js";
+import userRouter from "./usersRouter.js";
+import userSettingRouter from "./UserSettingRouter.js";
 import roleRouter from "./Rolerouter.js";
 import noteRouter from "./NoteRouter.js";
-import trashRouter from "./Trashrouter.js";
+import trashRouter from "./TrashRouter.js";
 import attachmentRouter from "./AttachmentRouter.js";
-import commentRouter from "./Commentrouter.js";
-import noteShareRouter from "./Notesharerouter.js";
-import notificationRouter from "./Notificationrouter.js";
-import sessionRouter from "./Sessionrouter.js";
-import auditLogRouter from "./AuditLogRouter.js";s
+import commentRouter from "./CommentRouter.js";
+import noteShareRouter from "./NoteShareRouter.js";
+import notificationRouter from "./NotificationRouter.js";
+import sessionRouter from "./SessionRouter.js";
+import auditLogRouter from "./AuditLogRouter.js";
 
 /**
  * router/index.js — gộp toàn bộ router con (1 file / 1 controller) thành
