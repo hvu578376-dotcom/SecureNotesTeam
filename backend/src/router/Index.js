@@ -2,18 +2,18 @@ import express from "express";
 import { AppError } from "../service/index.js";
 import { sendError } from "../controller/Httphelper.js";
 
-import authRouter from "./AuthRouter.js";
-import userRouter from "./UserRouter.js";
-import userSettingRouter from "./UserSettingRouter.js";
-import roleRouter from "./RoleRouter.js";
+import authRouter from "./Authrouter.js";
+import userRouter from "./Userrouter.js";
+import userSettingRouter from "./Usersettingrouter.js";
+import roleRouter from "./Rolerouter.js";
 import noteRouter from "./NoteRouter.js";
-import trashRouter from "./TrashRouter.js";
+import trashRouter from "./Trashrouter.js";
 import attachmentRouter from "./AttachmentRouter.js";
-import commentRouter from "./CommentRouter.js";
-import noteShareRouter from "./NoteShareRouter.js";
-import notificationRouter from "./NotificationRouter.js";
-import sessionRouter from "./SessionRouter.js";
-import auditLogRouter from "./AuditLogRouter.js";
+import commentRouter from "./Commentrouter.js";
+import noteShareRouter from "./Notesharerouter.js";
+import notificationRouter from "./Notificationrouter.js";
+import sessionRouter from "./Sessionrouter.js";
+import auditLogRouter from "./AuditLogRouter.js";s
 
 /**
  * router/index.js — gộp toàn bộ router con (1 file / 1 controller) thành
@@ -35,6 +35,25 @@ import auditLogRouter from "./AuditLogRouter.js";
  * mới là chỗ bắt buộc đúng thứ tự — xem ghi chú trong userRouter.js và
  * noteRouter.js.
  */
+//Quy định cấu trúc URL cho toàn bộ giao diện: Đoạn comment có nhắc đến việc frontend gọi 
+// fetch('/api/auth/login'). File này kết hợp với server.js để thiết lập quy tắc đó. Khi 
+// frontend muốn gọi bất kỳ tính năng nào để cập nhật giao diện (đăng nhập, lấy ghi chú, 
+// xóa file), họ đều phải gọi qua "cổng" chung là /api/.... File Index.js chính là nơi nối 
+// tất cả các router con vào cái cổng chung này.
+
+//Điều phối mượt mà không chồng chéo: File này gom tất cả 12 module 
+// (Auth, Note, Trash, Share,...) lại. Đối với Frontend, họ không cần biết Backend chia bao 
+// nhiêu file, họ chỉ cần gọi đúng URL. Index.js sẽ đóng vai trò như cảnh sát giao thông, 
+// tự động nhận diện URL từ giao diện gửi xuống và điều phối nó vào đúng Router con để xử lý 
+// (ví dụ: thấy /auth thì đẩy vào authRouter, thấy /notes thì đẩy vào noteRouter).
+
+//Trong quá trình code giao diện, nếu lập trình viên gọi sai đường dẫn API (ví dụ gõ 
+// nhầm /api/noteee thay vì /api/notes), mặc định máy chủ Express sẽ trả về một trang HTML 
+// báo lỗi. Điều này rất nguy hiểm vì khi giao diện cố đọc (parse) HTML đó dưới dạng JSON, 
+// ứng dụng sẽ bị crash (sập trắng màn hình). Đoạn code fallback này chặn lỗi đó lại và trả về 
+// một chuỗi JSON báo lỗi chuẩn form (AppError.notFound). Nhờ vậy, Frontend có thể dễ dàng bắt 
+// lỗi và hiển thị một thông báo màu đỏ thân thiện (Toast message) trên màn hình như: "Đường dẫn 
+// không tồn tại".
 const router = express.Router();
 
 router.use(authRouter);
