@@ -3,6 +3,7 @@ import * as sessionService from "./sessionService.js";
 import * as cryptoService from "./cryptoService.js";
 import * as totpService from "./totpService.js";
 import * as auditLogService from "./auditLogService.js";
+import * as emailService from "./emailService.js";
 import { AppError } from "./appError.js";
 
 const VERIFY_EMAIL_TTL_SECONDS = 24 * 60 * 60;
@@ -33,8 +34,9 @@ export async function register({ email, password, ipAddress = null, userAgent = 
     { purpose: "verify_email", userId: user.id },
     VERIFY_EMAIL_TTL_SECONDS
   );
+  await emailService.sendVerificationEmail({ recipient: normalizedEmail, token: verificationToken });
   await recordAuthAction("register", { userId: user.id, ipAddress, userAgent });
-  return { user, verificationToken };
+  return { user };
 }
 
 export async function verifyEmail(token) {

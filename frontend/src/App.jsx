@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./page/loginPage";
 import RegisterPage from "./page/registerPage";
 import ForgotPasswordPage from "./page/forgotPasswordPage";
+import VerifyEmailPage from "./page/verifyEmailPage";
 // import { saveToken } from "./services/tokenService";
 // import { login, register, requestPasswordReset } from "./services/loginService";
 
@@ -15,8 +16,13 @@ function App() {
   }
 
   async function handleRegister({ fullName, email, password }) {
-    // await register({ fullName, email, password });
-    console.log("register attempt", { fullName, email, password });
+    const response = await fetch("http://localhost:3000/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fullName, email, password }),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.message || "Đăng ký thất bại.");
   }
 
   async function handleRequestReset({ email }) {
@@ -36,6 +42,7 @@ function App() {
           path="/forgot-password"
           element={<ForgotPasswordPage onRequestReset={handleRequestReset} />}
         />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

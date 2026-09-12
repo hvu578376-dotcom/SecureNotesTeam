@@ -31,17 +31,13 @@ import { getBearerToken } from "../middleware/auth.js";
 
 export const register = asyncHandler(async (req, res) => {
   const { email, password } = req.body ?? {};
-  const { user, verificationToken } = await authService.register({
+  const { user } = await authService.register({
     email,
     password,
     ipAddress: req.ip,
     userAgent: req.get("user-agent"),
   });
-  // Dự án chưa cấu hình dịch vụ gửi email thật (xem comment trong
-  // authService.register) nên verificationToken tạm thời trả thẳng ra
-  // đây để FE tự xử lý/hiển thị. Khi có email thật, nên BỎ trường này
-  // khỏi response và gửi verificationToken qua email thay vì trả về FE.
-  res.status(201).json({ success: true, data: { user, verificationToken } });
+  res.status(201).json({ success: true, message: "Đăng ký thành công. Vui lòng kiểm tra email để xác minh tài khoản.", data: { user } });
 });
 
 export const verifyEmail = asyncHandler(async (req, res) => {
