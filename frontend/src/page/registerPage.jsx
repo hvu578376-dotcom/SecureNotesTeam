@@ -16,14 +16,12 @@ export default function RegisterPage({ onRegister }) {
   const [loading, setLoading] = useState(false);
   const [banner, setBanner] = useState(null);
 
-  const nameError =
-    touched && fullName.trim().length < 2 ? "Vui lòng nhập họ tên." : "";
   const emailError =
     touched && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
       ? "Vui lòng nhập đúng định dạng email."
       : "";
   const passwordError =
-    touched && password.length < 8 ? "Mật khẩu phải có ít nhất 8 ký tự." : "";
+    touched && password.length < 6 ? "Mật khẩu phải có ít nhất 6 ký tự." : "";
   const confirmError =
     touched && confirmPassword !== password
       ? "Mật khẩu xác nhận không khớp."
@@ -35,11 +33,10 @@ export default function RegisterPage({ onRegister }) {
     setBanner(null);
 
     if (
-      nameError ||
       emailError ||
       passwordError ||
       confirmPassword !== password ||
-      password.length < 8
+      password.length < 6
     ) {
       setBanner({
         type: "error",
@@ -50,9 +47,9 @@ export default function RegisterPage({ onRegister }) {
 
     try {
       setLoading(true);
-      // TODO: thay bằng lệnh gọi thật, ví dụ authService.register({ fullName, email, password })
+      // TODO: thay bằng lệnh gọi thật, ví dụ authService.register({ email, password })
       if (onRegister) {
-        await onRegister({ fullName, email, password });
+        await onRegister({ email, password });
       } else {
         await new Promise((resolve) => setTimeout(resolve, 1200));
       }
@@ -85,24 +82,6 @@ export default function RegisterPage({ onRegister }) {
         )}
 
         <form onSubmit={handleSubmit} noValidate>
-          <div className="field">
-            <label htmlFor="register-name">Họ và tên</label>
-            <div className="input-wrap">
-              <input
-                id="register-name"
-                type="text"
-                placeholder="Nguyễn Văn A"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                aria-invalid={!!nameError}
-                autoComplete="name"
-              />
-            </div>
-            <div className={`error-text ${nameError ? "show" : ""}`}>
-              {nameError}
-            </div>
-          </div>
-
           <div className="field">
             <label htmlFor="register-email">Email</label>
             <div className="input-wrap">

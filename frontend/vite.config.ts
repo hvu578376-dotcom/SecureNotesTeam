@@ -30,13 +30,17 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       host: process.env.FIGMA_DEV_SERVER_HOST || '0.0.0.0',
-      port: parseInt(process.env.PORT || '8443'),
+      // Phải khớp với FRONTEND_URL trong backend/.env (và fallback trong
+      // emailService.js) — đó là URL được nhúng vào link xác minh email.
+      // Giữ nguyên "8443" (leftover từ scaffold Figma Make) sẽ khiến link
+      // xác minh trỏ tới cổng không ai lắng nghe -> bấm vào link bị lỗi.
+      port: parseInt(process.env.PORT || '5173'),
       strictPort: true,
       watch: { ignored: ['**/.figma/**'] },
     },
     preview: {
       host: process.env.FIGMA_DEV_SERVER_HOST || '0.0.0.0',
-      port: parseInt(process.env.PORT || '8443'),
+      port: parseInt(process.env.PORT || '5173'),
     },
   }
 })

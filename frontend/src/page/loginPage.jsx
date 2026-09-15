@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ShieldCheck, ArrowRight } from "lucide-react";
 import AuthLayout from "../component/AuthLayout";
 import "../style/style.css";
 
 export default function LoginPage({ onLogin }) {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -35,7 +37,6 @@ export default function LoginPage({ onLogin }) {
 
     try {
       setLoading(true);
-      // TODO: thay bằng lệnh gọi thật, ví dụ loginService.login({ email, password, remember })
       if (onLogin) {
         await onLogin({ email, password, remember });
       } else {
@@ -45,6 +46,10 @@ export default function LoginPage({ onLogin }) {
         type: "info",
         text: "Đăng nhập thành công. Đang chuyển đến kho lưu trữ của bạn…",
       });
+      // Chuyển sang trang chủ sau khi đã có token thật (xem App.jsx
+      // handleLogin -> tokenService.saveToken) — trước đây banner báo
+      // "đang chuyển đến..." nhưng không có lệnh navigate nào cả.
+      setTimeout(() => navigate("/"), 1200);
     } catch (err) {
       setBanner({
         type: "error",
