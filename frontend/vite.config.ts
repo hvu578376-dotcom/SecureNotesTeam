@@ -35,12 +35,13 @@ export default defineConfig(({ mode }) => {
       // Giữ nguyên "8443" (leftover từ scaffold Figma Make) sẽ khiến link
       // xác minh trỏ tới cổng không ai lắng nghe -> bấm vào link bị lỗi.
       port: parseInt(process.env.PORT || '5173'),
-      strictPort: true,
+      strictPort: false,
       watch: { ignored: ['**/.figma/**'] },
     },
     preview: {
       host: process.env.FIGMA_DEV_SERVER_HOST || '0.0.0.0',
       port: parseInt(process.env.PORT || '5173'),
+      strictPort: false,
     },
   }
 })

@@ -17,7 +17,7 @@ function App() {
       // Tài khoản có bật 2FA — backend đã trả đúng challengeToken (xem
       // authService.login), nhưng giao diện đăng nhập hiện chưa có màn
       // hình nhập mã 2FA (bước kế tiếp cần POST /api/auth/login/2fa với
-      // challengeToken + code, xem loginService.verifyTwoFactor). Không
+      // challengeToken + code, xem loginService.verifyTwoFactor). Khôn
       // có user test nào trong seed data cuối sql.sql bật 2FA nên điều
       // này chưa chặn việc demo bằng 3 tài khoản mẫu.
       throw new Error(
