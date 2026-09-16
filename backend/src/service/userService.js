@@ -122,6 +122,25 @@ export async function changePassword(userId, { oldPassword, newPassword }) {
   return toSafeUser(user);
 }
 
+/**
+ * Đặt mật khẩu mới TRỰC TIẾP, KHÔNG kiểm tra mật khẩu cũ — khác với
+ * changePassword() ở trên. CHỈ authService.resetPassword() được gọi hàm
+ * này, và CHỈ sau khi đã xác minh chữ ký + hạn dùng của reset token qua
+ * cryptoService.verifyEphemeralToken() (tức người gọi đã chứng minh quyền
+ * truy cập hộp email của tài khoản qua liên kết reset, thay cho việc biết
+ * mật khẩu cũ). Dùng cho bước 2 của luồng "Quên mật khẩu".
+ */
+export async function resetPassword(userId, newPassword) {
+  const user = await findByIdForAuth(userId);
+  if (!user) throw AppError.notFound("Không tìm thấy người dùng.", "USER_NOT_FOUND");
+  if (!newPassword || newPassword.length < MIN_PASSWORD_LENGTH) {
+    throw AppError.badRequest(`Mật khẩu mới cần tối thiểu ${MIN_PASSWORD_LENGTH} ký tự.`, "PASSWORD_TOO_SHORT");
+  }
+  user.passwordHash = hashPassword(newPassword);
+  await user.save();
+  return toSafeUser(user);
+}
+
 /** Admin đổi trạng thái tài khoản (active/banned/unverified) — Module 8. */
 export async function setStatus(userId, status) {
   if (!VALID_STATUSES.includes(status)) {
@@ -162,6 +181,7 @@ export default {
   findByIdForAuth,
   createUser,
   changePassword,
+  resetPassword,
   setStatus,
   updateUserRole,
   setTwoFactorSecret,

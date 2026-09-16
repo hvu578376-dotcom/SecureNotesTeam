@@ -50,23 +50,26 @@ export async function register({ email, password }) {
 }
 
 /**
- * Quên mật khẩu — backend HIỆN CHƯA có route tương ứng (không có
- * POST /api/auth/forgot-password hay tương đương nào trong
- * backend/src/router/AuthRouter.js / controller/Cauth.js / service/authService.js
- * ở thời điểm nối API này). Thay vì gọi một endpoint không tồn tại (sẽ rơi
- * vào fallback ROUTE_NOT_FOUND ở router/index.js), hàm này throw lỗi rõ
- * ràng ngay từ phía frontend, để forgotPasswordPage.jsx hiện đúng banner đỏ
- * giải thích lý do thay vì một thông báo "route not found" chung chung.
- *
- * Khi backend bổ sung route thật (VD POST /api/auth/forgot-password nhận
- * { email }, gửi mail chứa link đặt lại mật khẩu qua emailService.js hiện
- * có), chỉ cần thay thân hàm này bằng:
- *   return apiPost("/auth/forgot-password", { email });
+ * Quên mật khẩu (bước 1) — POST /api/auth/forgot-password. Backend
+ * (authService.requestPasswordReset) LUÔN trả về cùng 1 message thành công
+ * dù email có tồn tại trong hệ thống hay không, để chống dò email — vì vậy
+ * hàm này không nên được dùng để suy luận email đã đăng ký hay chưa, chỉ
+ * nên hiển thị nguyên message trả về (xem forgotPasswordPage.jsx).
  */
 export async function requestPasswordReset({ email }) {
-  throw new Error(
-    "Tính năng quên mật khẩu chưa được hỗ trợ ở backend (chưa có route /api/auth/forgot-password)."
-  );
+  return apiPost("/auth/forgot-password", { email });
 }
 
-export default { login, verifyTwoFactor, register, requestPasswordReset };
+/**
+ * Quên mật khẩu (bước 2) — POST /api/auth/reset-password. `token` lấy từ
+ * query string của liên kết trong email (do emailService.sendPasswordResetEmail
+ * sinh ra), resetPasswordPage.jsx đọc bằng useSearchParams() rồi truyền vào
+ * đây cùng mật khẩu mới người dùng nhập. Đặt lại thành công thì mọi thiết
+ * bị đang đăng nhập trước đó đều bị đăng xuất (xem authService.resetPassword),
+ * nên sau bước này người dùng cần đăng nhập lại bằng mật khẩu mới.
+ */
+export async function resetPassword({ token, newPassword }) {
+  return apiPost("/auth/reset-password", { token, newPassword });
+}
+
+export default { login, verifyTwoFactor, register, requestPasswordReset, resetPassword };

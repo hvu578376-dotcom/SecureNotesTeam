@@ -2,10 +2,11 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./page/loginPage";
 import RegisterPage from "./page/registerPage";
 import ForgotPasswordPage from "./page/forgotPasswordPage";
+import ResetPasswordPage from "./page/resetPasswordPage";
 import VerifyEmailPage from "./page/verifyEmailPage";
 import HomePage from "./page/HomePage";
 import { saveToken } from "./services/TokenService";
-import { login, register, requestPasswordReset } from "./services/LoginService";
+import { login, register, requestPasswordReset, resetPassword } from "./services/LoginService.js";
 
 function App() {
   // Nối các hàm này với services/loginService.js của bạn.
@@ -35,6 +36,10 @@ function App() {
     await requestPasswordReset({ email });
   }
 
+  async function handleResetPassword({ token, newPassword }) {
+    await resetPassword({ token, newPassword });
+  }
+
   return (
     <BrowserRouter>
       <Routes>
@@ -46,6 +51,10 @@ function App() {
         <Route
           path="/forgot-password"
           element={<ForgotPasswordPage onRequestReset={handleRequestReset} />}
+        />
+        <Route
+          path="/reset-password"
+          element={<ResetPasswordPage onResetPassword={handleResetPassword} />}
         />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/" element={<HomePage />} />

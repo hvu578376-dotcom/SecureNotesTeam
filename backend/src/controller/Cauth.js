@@ -18,6 +18,8 @@ import { getBearerToken } from "../middleware/auth.js";
  *   POST   /api/auth/login/2fa      -> verifyTwoFactor         (bước 2 khi tài khoản có bật 2FA)
  *   POST   /api/auth/logout         -> logout
  *   PATCH  /api/auth/password       -> changePassword         (middleware requireAuth)
+ *   POST   /api/auth/forgot-password -> forgotPassword         (bước 1 quên mật khẩu, khớp forgotPasswordPage.jsx)
+ *   POST   /api/auth/reset-password  -> resetPassword          (bước 2 quên mật khẩu, khớp resetPasswordPage.jsx)
  *   POST   /api/auth/2fa/setup      -> beginTwoFactorSetup     (middleware requireAuth)
  *   POST   /api/auth/2fa/confirm    -> confirmTwoFactorSetup   (middleware requireAuth)
  *   POST   /api/auth/2fa/disable    -> disableTwoFactor        (middleware requireAuth)
@@ -92,6 +94,47 @@ export const changePassword = asyncHandler(async (req, res) => {
   res.json({ success: true, data: { user } });
 });
 
+/**
+ * Bước 1 "Quên mật khẩu" — phục vụ forgotPasswordPage.jsx (form chỉ có ô Email).
+ * LUÔN trả về cùng 1 message thành công dù email có tồn tại trong hệ thống
+ * hay không (xem authService.requestPasswordReset) — tránh lộ thông tin cho
+ * kẻ tấn công dùng API này để dò xem 1 email đã đăng ký SecureNotes chưa.
+ */
+export const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body ?? {};
+  await authService.requestPasswordReset({
+    email,
+    ipAddress: req.ip,
+    userAgent: req.get("user-agent"),
+  });
+  res.json({
+    success: true,
+    message: "Nếu email tồn tại trong hệ thống, một liên kết đặt lại mật khẩu đã được gửi tới hộp thư của bạn.",
+  });
+});
+
+/**
+ * Bước 2 "Quên mật khẩu" — phục vụ resetPasswordPage.jsx (form nhập mật khẩu
+ * mới + xác nhận), trang mà người dùng đến khi bấm liên kết trong email gửi
+ * ở bước 1. `token` lấy từ query string của liên kết đó (FE đọc bằng
+ * useSearchParams() rồi gửi lên trong body, KHÔNG phải header Authorization
+ * — token này chứng minh quyền sở hữu hộp email, không phải phiên đăng nhập).
+ */
+export const resetPassword = asyncHandler(async (req, res) => {
+  const { token, newPassword } = req.body ?? {};
+  const user = await authService.resetPassword({
+    token,
+    newPassword,
+    ipAddress: req.ip,
+    userAgent: req.get("user-agent"),
+  });
+  res.json({
+    success: true,
+    message: "Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.",
+    data: { user },
+  });
+});
+
 /** Bước 1 bật 2FA: sinh secret + otpauth URL để FE vẽ QR (chưa bật thật). */
 export const beginTwoFactorSetup = asyncHandler(async (req, res) => {
   const userId = req.userId;
@@ -122,6 +165,8 @@ export default {
   verifyTwoFactor,
   logout,
   changePassword,
+  forgotPassword,
+  resetPassword,
   beginTwoFactorSetup,
   confirmTwoFactorSetup,
   disableTwoFactor,

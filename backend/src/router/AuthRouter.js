@@ -9,9 +9,12 @@ import { requireAuth } from "../middleware/auth.js";
  * Đây chính là router mà frontend/login.html gọi tới — fetch('/api/auth/login')
  * hoạt động được nhờ router này (xem server.js).
  *
- * register/verify-email/login/login/2fa/logout KHÔNG gắn middleware
- * (4 route đầu vì chưa đăng nhập thì đương nhiên chưa có token; logout
- * thì cố tình khoan dung — xem LƯU Ý trong CAuth.js). 4 route còn lại
+ * register/verify-email/login/login/2fa/logout/forgot-password/reset-password
+ * KHÔNG gắn middleware (các route đầu vì chưa đăng nhập thì đương nhiên
+ * chưa có token; logout thì cố tình khoan dung — xem LƯU Ý trong CAuth.js;
+ * forgot-password/reset-password cũng KHÔNG THỂ đòi token phiên đăng nhập
+ * vì đây chính là luồng dành cho người dùng KHÔNG đăng nhập được — reset-password
+ * tự xác minh bằng token lấy từ email thay vì requireAuth). 4 route còn lại
  * (đổi mật khẩu, 2FA) bắt buộc requireAuth — token hợp lệ sẽ được gán
  * sẵn vào req.userId/req.token, controller không tự đọc header nữa.
  */
@@ -39,6 +42,15 @@ router.post("/auth/logout", authController.logout);
 // luôn có thể xóa phiên đăng nhập hiện tại dù trạng thái token ra sao.
 router.patch("/auth/password", requireAuth, authController.changePassword);
 //Phục vụ form Đổi mật khẩu (thường có 3 ô: Mật khẩu hiện tại, Mật khẩu mới, Xác nhận mật khẩu mới).
+router.post("/auth/forgot-password", authController.forgotPassword);
+//(Quên mật khẩu - bước 1): Phục vụ forgotPasswordPage.jsx (form chỉ có ô Email). Không gắn
+// requireAuth vì người dùng lúc này chưa đăng nhập được (đó chính là lý do họ cần màn hình này).
+// Gửi email chứa liên kết trỏ tới /reset-password?token=... nếu email khớp 1 tài khoản.
+router.post("/auth/reset-password", authController.resetPassword);
+//(Quên mật khẩu - bước 2): Phục vụ resetPasswordPage.jsx (form Mật khẩu mới + Xác nhận mật khẩu
+// mới), trang người dùng vào khi bấm liên kết trong email ở bước 1. Không gắn requireAuth vì xác
+// thực ở đây dựa vào token lấy từ email (được xác minh trong authService.resetPassword), không
+// phải token phiên đăng nhập thông thường.
 router.post("/auth/2fa/setup", requireAuth, authController.beginTwoFactorSetup);
 //Phục vụ nút Bật bảo mật 2 lớp. Khi bấm nút này, giao diện gọi API để lấy dữ liệu sinh ra một 
 // Mã QR hiển thị lên màn hình.
